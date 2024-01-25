@@ -25,11 +25,11 @@ for i in range(7):
 			try:
 				edges.append(Edge([nodes[i], nodes[j]], get_edge_weight(nodes[i].value, nodes[j].value)))
 			except:
-				print("oops")
+				pass
 			try:
 				edges.append(Edge([nodes[7-i], nodes[7-j]], get_edge_weight(nodes[7-i].value, nodes[7-j].value)))
 			except:
-				print("oops")
+				pass
 
 g = Graph(nodes, edges)
 

@@ -17,9 +17,6 @@ class Pool():
 	def __init__(self, reserve0: Reserve, reserve1: Reserve):
 		self.reserve0 = reserve0
 		self.reserve1 = reserve1
-
-	def __eq__(self, __value: object) -> bool:
-		return self.reserve0 == __value.reserve0 and self.reserve1 == __value.reserve1
 	
 	def amountOut(self, tokenIn: str, amountIn: int):
 		'''
@@ -41,6 +38,12 @@ class Pool():
 		denominator = reserveIn * 1000 + inWithFee
 		amountOut = numerator / denominator
 		return amountOut
+	
+	def __eq__(self, __value: object) -> bool:
+		return self.reserve0 == __value.reserve0 and self.reserve1 == __value.reserve1
+	
+	def __str__(self) -> str:
+		return "Pool(pair=[%s-%s], reserve0=%s, reserve1=%s)" % (self.reserve0.asset, self.reserve1.asset, self.reserve0.amount, self.reserve1.amount)
 		
 def get_edge_weight(pool0: Pool, pool1: Pool) -> (Reserve, Reserve):
 	pool0reserves = [pool0.reserve0, pool0.reserve1]

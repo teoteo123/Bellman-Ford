@@ -59,7 +59,7 @@ class Edge():
 		return self.nodes == __value.nodes
 
 	def __str__(self) -> str:
-		return "Edge((%s)---%s--->(%s))" % (self.nodes[0].value, self.weight, self.nodes[1].value)
+		return "Edge((%s)---[%s]--->(%s))" % (self.nodes[0].value, self.weight, self.nodes[1].value)
 	
 '''
 Collection of nodes and edges with some functions to help out
