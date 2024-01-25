@@ -1,3 +1,4 @@
+
 class Reserve():
 
 	asset: str
@@ -44,6 +45,11 @@ class Pool():
 	
 	def __str__(self) -> str:
 		return "Pool(pair=[%s-%s], reserve0=%s, reserve1=%s)" % (self.reserve0.asset, self.reserve1.asset, self.reserve0.amount, self.reserve1.amount)
+	
+	def __hash__(self) -> int:
+		hash_str = str(self.reserve0.asset) + str(self.reserve0.amount) + str(self.reserve1.asset) + str(self.reserve1.amount)
+		return sum([ord(char)**i for (i, char) in zip([i for i in range(len(hash_str))], hash_str)])
+	
 		
 def get_edge_weight(pool0: Pool, pool1: Pool) -> (Reserve, Reserve):
 	pool0reserves = [pool0.reserve0, pool0.reserve1]

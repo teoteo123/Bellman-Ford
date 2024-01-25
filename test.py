@@ -1,11 +1,13 @@
 from graph import *
 from pangolin import *
+from bellman_ford import *
 
 a_reserves = [Reserve('a', 5), Reserve('a', 7), Reserve('a', 9), Reserve('a', 1)]
 b_reserves = [Reserve('b', 4), Reserve('b', 13), Reserve('b', 10), Reserve('b', 7)]
 c_reserves = [Reserve('c', 12), Reserve('c', 3)]
 d_reserves = [Reserve('d', 6), Reserve('d', 8), Reserve('d', 13)]
 e_reserves = [Reserve('e', 6), Reserve('e', 2), Reserve('e', 5)]
+
 
 p0 = Pool(b_reserves[0], d_reserves[0])
 p1 = Pool(c_reserves[0], b_reserves[1])
@@ -31,6 +33,6 @@ for i in range(7):
 			except:
 				pass
 
-g = Graph(nodes, edges)
+graph = Graph(nodes, edges)
 
-print(g)
+bellman_ford(graph, start_node=nodes[3])

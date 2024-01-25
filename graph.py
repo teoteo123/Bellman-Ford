@@ -21,10 +21,13 @@ class Node():
 			self.edges.remove(edge)
 	
 	def __str__(self) -> str:
-		return "Node(value=%s edges=%s)" % (self.value, self.edges)
+		return "Node(value=%s edges=%s)" % (self.value, "".join(['\n\t' + str(edge.weight) + '  ' + str(edge.nodes[1].value) for edge in self.edges]))
 	
 	def __eq__(self, __value: object) -> bool:
 		return self.value == __value.value
+	
+	def __hash__(self) -> int:
+		return self.value.__hash__()
 
 
 '''
@@ -35,6 +38,7 @@ Edge(weight=0.6, nodes=['a', 'b']) === (a)-->(b)
 class Edge():
 
 	nodes: []
+	weight: float
 
 	def __init__(self, nodes, weight):
 		self.nodes = nodes
@@ -63,6 +67,7 @@ class Edge():
 	
 '''
 Collection of nodes and edges with some functions to help out
+To traverse graph, iterate nodes and look for neighboring nodes via their edges
 '''
 class Graph():
 	nodes: []
