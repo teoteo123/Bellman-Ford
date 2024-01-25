@@ -3,21 +3,22 @@
 class Node():
 
 	edges: []
+	value: any
 
 	def __init__(self, value):
 		self.value = value
 		self.edges = []
 
-		def get_edges(self):
-			return self.edges
-		
-		def add_edge(self, edge):
-			if edge not in self.edges:
-				self.edges.append(edge)
+	def get_edges(self):
+		return self.edges
+	
+	def add_edge(self, edge):
+		if edge not in self.edges:
+			self.edges.append(edge)
 
-		def remove_edge(self, edge):
-			if (edge in self.edges):
-				self.edges.remove(edge)
+	def remove_edge(self, edge):
+		if (edge in self.edges):
+			self.edges.remove(edge)
 	
 	def __str__(self) -> str:
 		return "Node(value=%s edges=%s)" % (self.value, self.edges)
@@ -67,9 +68,16 @@ class Graph():
 	nodes: []
 	edges: []
 
-	def __init__(self) -> None:
-		self.nodes = []
+	def __init__(self, nodes, edges) -> None:
+		if (nodes != None):
+			self.nodes = nodes
+		else:
+			self.nodes = []
+		
 		self.edges = []
+		if (self.edges != None):
+			for edge in edges:
+				self.add_edge(edge)
 
 	def add_node(self, node: Node):
 		self.nodes.append(node)

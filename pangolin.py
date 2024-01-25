@@ -42,3 +42,15 @@ class Pool():
 		amountOut = numerator / denominator
 		return amountOut
 		
+def get_edge_weight(pool0: Pool, pool1: Pool) -> (Reserve, Reserve):
+	pool0reserves = [pool0.reserve0, pool0.reserve1]
+	pool1reserves = [pool1.reserve0, pool1.reserve1]
+	for (i, p0reserve) in zip([0, 1], pool0reserves):
+		for (j, p1reserve) in zip([0, 1], pool1reserves):
+			if (p0reserve.asset == p1reserve.asset):
+				ra0 = pool0reserves[(i+1) % 2].amount
+				rb0 = pool0reserves[i].amount
+				rb1 = pool1reserves[j].amount
+				rc1 = pool1reserves[(j+1) % 2].amount
+				return (rb0 * rc1) / (ra0 * rb1) - 1
+	raise ValueError("Pools %s and %s do not have an asset in common")
