@@ -61,5 +61,5 @@ def get_edge_weight(pool0: Pool, pool1: Pool) -> (Reserve, Reserve):
 				rb0 = pool0reserves[i].amount
 				rb1 = pool1reserves[j].amount
 				rc1 = pool1reserves[(j+1) % 2].amount
-				return (rb0 * rc1) / (ra0 * rb1) - 1
+				return (rb0 * rc1) / (ra0 * rb1)
 	raise ValueError("Pools %s and %s do not have an asset in common")
