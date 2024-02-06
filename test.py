@@ -1,3 +1,4 @@
+from ast import literal_eval
 import json
 from graph import *
 from pangolin import *
@@ -47,7 +48,7 @@ def test_two_nodes():
 	bellman_ford(twoGraph, start_node=twoNodes[1])
 	bellman_ford(twoGraph, start_node=twoNodes[0])
 
-def test_infura_getPair_call():
+def test_getPair():
 	infura_url = 'https://avalanche-mainnet.infura.io/v3/d1e7d4e46bba461cb67651a8c5d508b8'
 	headers = {
     'Content-Type': 'application/json',
@@ -73,5 +74,38 @@ def test_infura_getPair_call():
 			json=json_data,
 	)
 	print('0x' + json.loads(response.content)['result'][-40:])
+# test_getPair()
 
-test_infura_getPair_call()
+def test_getReserves():
+	infura_url = 'https://avalanche-mainnet.infura.io/v3/d1e7d4e46bba461cb67651a8c5d508b8'
+	headers = {
+    'Content-Type': 'application/json',
+	}
+
+	json_data = {
+			'jsonrpc': '2.0',
+			'method': 'eth_call',
+			'params': [
+					{
+							'from': '0xBd14F2b9813b23AF7e38C979EaDfaF17C049bEA5',
+							'to': '0x0e0100ab771e9288e0aa97e11557e6654c3a9665', # pool address
+							'data': '0x0902f1ac', # getReserves function selector
+					},
+					'latest',
+			],
+			'id': 1,
+	}
+
+	response = requests.post(
+			infura_url,
+			headers=headers,
+			json=json_data,
+	)
+	result = json.loads(response.content)['result'][2:]
+	r0 = literal_eval('0x' + result[:64][-28:])
+	r1 = literal_eval('0x' + result[64:128][-28:])
+
+
+	print(str(r0) + '\n' + str(r1))
+	# print('0x' + json.loads(response.content)['result'])
+test_getReserves()
