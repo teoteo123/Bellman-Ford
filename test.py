@@ -5,21 +5,22 @@ from pangolin import *
 from bellman_ford import *
 import requests
 
-a_reserves = [Reserve('a', 5), Reserve('a', 7), Reserve('a', 9), Reserve('a', 1)]
-b_reserves = [Reserve('b', 4), Reserve('b', 13), Reserve('b', 10), Reserve('b', 7)]
-c_reserves = [Reserve('c', 12), Reserve('c', 3)]
-d_reserves = [Reserve('d', 6), Reserve('d', 8), Reserve('d', 13)]
-e_reserves = [Reserve('e', 6), Reserve('e', 2), Reserve('e', 5)]
+from pool_graph import PoolGraph
 
+a_reserves = [5, 7, 9, 1]
+b_reserves = [4, 13, 10, 7]
+c_reserves = [12, 3]
+d_reserves = [6,8,13]
+e_reserves = [6, 2, 5]
 
-p0 = Pool(b_reserves[0], d_reserves[0])
-p1 = Pool(c_reserves[0], b_reserves[1])
-p2 = Pool(a_reserves[0], c_reserves[1])
-p3 = Pool(a_reserves[1], d_reserves[1])
-p4 = Pool(a_reserves[2], b_reserves[2])
-p5 = Pool(a_reserves[3], e_reserves[1])
-p6 = Pool(b_reserves[3], e_reserves[0])
-p7 = Pool(e_reserves[2], d_reserves[2])
+p0 = Pool("0x0", b_reserves[0], d_reserves[0])
+p1 = Pool("0x1", c_reserves[0], b_reserves[1])
+p2 = Pool("0x2", a_reserves[0], c_reserves[1])
+p3 = Pool("0x3", a_reserves[1], d_reserves[1])
+p4 = Pool("0x4", a_reserves[2], b_reserves[2])
+p5 = Pool("0x5", a_reserves[3], e_reserves[1])
+p6 = Pool("0x6", b_reserves[3], e_reserves[0])
+p7 = Pool("0x7", e_reserves[2], d_reserves[2])
 
 def test_random_vals():
 
@@ -111,3 +112,11 @@ def test_getReserves():
 
 # print(getPairAddress('0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E', '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7'))
 # print(getTokenAddresses('0x0e0100ab771e9288e0aa97e11557e6654c3a9665'))
+
+
+
+pg = PoolGraph()
+
+pg.refresh_nodes_edges()
+bellman_ford(pg.graph, pg.graph.nodes[0])
+bellman_ford(pg.graph, pg.graph.nodes[3])

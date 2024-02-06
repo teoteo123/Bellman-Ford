@@ -14,9 +14,9 @@ def bellman_ford(g: Graph, start_node: Node):
 				u = edge.nodes[0]
 				v = edge.nodes[1]
 				weight = edge.weight
-				if distances[u] * weight < distances[v]:
-					distances[v] = distances[u] * weight
+				if distances[u] + weight < distances[v]:
+					distances[v] = distances[u] + weight
 					predecessors[v] = u
 
-	print("Start: " + start_node.value.reserve0.asset + "/" + start_node.value.reserve1.asset + "\n\t" + "\n\t".join([k.value.reserve0.asset + "/" + k.value.reserve1.asset + ": " + str(v) for k, v in distances.items()]))
+	print("Start: " + start_node.value.token0.symbol + "/" + start_node.value.token1.symbol + "\n\t" + "\n\t".join([k.value.token0.symbol + "/" + k.value.token1.symbol + ": " + str(v) for k, v in distances.items()]))
 

@@ -1,49 +1,54 @@
 from ast import literal_eval
+import binascii
 import json
 import requests
 
-class Asset():
-	'''
-	@TODO
-	'''
-	def __init__(self) -> None:
+class Token():
+
+	address: str
+	symbol: str
+
+	def __init__(self, address: str, symbol: str = "") -> None:
+		self.address = address
+		self.symbol = symbol
+
+	def fetch_symbol(self):
+		# @TODO
 		pass
-
-class Reserve():
-
-	asset: str
-	amount: float
-
-	def __init__(self, asset, amount):
-		self.asset = asset
-		self.amount = amount
-	def __eq__(self, __value: object) -> bool:
-		return self.asset == __value.asset and self.amount == __value.amount
 
 class Pool():
 	'''
 	@TODO adapt to real pool
 	'''
 
-	reserve0: Reserve
-	reserve1: Reserve
+	address: str
 
-	def __init__(self, reserve0: Reserve, reserve1: Reserve):
+	reserve0: int
+	reserve1: int
+
+	token0: Token
+	token1: Token
+
+	def __init__(self, address: str, reserve0: int, reserve1: int, token0Addr: str = "", token1Addr: str = "", token0_sym: str = "", token1_sym: str = ""):
+		self.address = address
 		self.reserve0 = reserve0
 		self.reserve1 = reserve1
+		self.token0 = Token(token0Addr, token0_sym)
+		self.token1 = Token(token1Addr, token1_sym)
 	
 	def amountOut(self, tokenIn: str, amountIn: int):
 		'''
+		tokenIn: contract address of input token
 		returns the expected amount of tokens out given a proposed swap
 		'''
 		reserveIn = 0
 		reserveOut = 0
-		if self.reserve0.asset == tokenIn:
-			reserveIn = self.reserve0.amount
-			reserveOut = self.reserve1.amount
-		elif self.reserve1.asset == tokenIn:
-			reserveIn = self.reserve1.amount
-			reserveOut = self.reserve0.amount
+		if self.token0.address == tokenIn:
+			reserveIn = self.reserve0
+			reserveOut = self.reserve1
+		elif self.token1.address == tokenIn:
+			reserveIn = self.reserve1
+			reserveOut = self.reserve0
 		else:
 			raise ValueError("Invalid token for this pool")
 		
@@ -54,29 +59,29 @@ class Pool():
 		return amountOut
 	
 	def __eq__(self, __value: object) -> bool:
-		return self.reserve0 == __value.reserve0 and self.reserve1 == __value.reserve1
+		return self.address == __value.address
 	
 	def __str__(self) -> str:
-		return "Pool(pair=[%s-%s], reserve0=%s, reserve1=%s)" % (self.reserve0.asset, self.reserve1.asset, self.reserve0.amount, self.reserve1.amount)
+		return "Pool(pair=[%s-%s], reserve0=%s, reserve1=%s)" % (self.token0.symbol, self.token1.symbol, self.reserve0, self.reserve1)
 	
 	def __hash__(self) -> int:
-		hash_str = str(self.reserve0.asset) + str(self.reserve0.amount) + str(self.reserve1.asset) + str(self.reserve1.amount)
-		return sum([ord(char)**i for (i, char) in zip([i for i in range(len(hash_str))], hash_str)])
+		return literal_eval(self.address)
 	
 
 
-def get_edge_weight(pool0: Pool, pool1: Pool) -> (Reserve, Reserve):
+def get_edge_weight(pool0: Pool, pool1: Pool) -> float:
 	pool0reserves = [pool0.reserve0, pool0.reserve1]
 	pool1reserves = [pool1.reserve0, pool1.reserve1]
-	for (i, p0reserve) in zip([0, 1], pool0reserves):
-		for (j, p1reserve) in zip([0, 1], pool1reserves):
-			if (p0reserve.asset == p1reserve.asset):
-				ra0 = pool0reserves[(i+1) % 2].amount
-				rb0 = pool0reserves[i].amount
-				rb1 = pool1reserves[j].amount
-				rc1 = pool1reserves[(j+1) % 2].amount
+	for (i, p0tok) in zip([0, 1], [pool0.token0.address, pool0.token1.address]):
+		for (j, p1tok) in zip([0, 1], [pool1.token0.address, pool1.token1.address]):
+			if (p0tok == p1tok):
+				ra0 = pool0reserves[(i+1) % 2]
+				rb0 = pool0reserves[i]
+				rb1 = pool1reserves[j]
+				rc1 = pool1reserves[(j+1) % 2]
 				return (rb0 * rc1) / (ra0 * rb1)
 	raise ValueError("Pools %s and %s do not have an asset in common")
+
 
 
 def getPairAddress(token0address: str, token1address: str) -> str:
@@ -111,7 +116,7 @@ def getPairAddress(token0address: str, token1address: str) -> str:
 	)
 	return '0x' + json.loads(response.content)['result'][-40:]
 
-def getReserves(poolAddress: str) -> (int, int):
+def getReserves(pool_address: str) -> (int, int):
 	infura_url = 'https://avalanche-mainnet.infura.io/v3/d1e7d4e46bba461cb67651a8c5d508b8'
 	headers = {
     'Content-Type': 'application/json',
@@ -123,7 +128,7 @@ def getReserves(poolAddress: str) -> (int, int):
 			'params': [
 					{
 							'from': '0xBd14F2b9813b23AF7e38C979EaDfaF17C049bEA5',
-							'to': poolAddress, # pool address
+							'to': pool_address, # pool address
 							'data': '0x0902f1ac', # getReserves function selector
 					},
 					'latest',
@@ -196,6 +201,39 @@ def getTokenAddresses(poolAddress: str) -> (str, str):
 	t1 = '0x' + t1_result[-40:]
 	return (t0, t1)
 
+def get_symbol(token_address: str):
+	infura_url = 'https://avalanche-mainnet.infura.io/v3/d1e7d4e46bba461cb67651a8c5d508b8'
+	headers = {
+    'Content-Type': 'application/json',
+	}
+
+	json_data = {
+			'jsonrpc': '2.0',
+			'method': 'eth_call',
+			'params': [
+					{
+							'from': '0xBd14F2b9813b23AF7e38C979EaDfaF17C049bEA5',
+							'to': token_address,
+							'data': '0x95d89b41',
+					},
+					'latest',
+			],
+			'id': 1,
+	}
+
+	response = requests.post(
+		infura_url,
+		headers=headers,
+		json=json_data,
+	)
+	bytez = bytearray.fromhex(json.loads(response.content)['result'][128:])
+	symbol = []
+	for byte in bytez:
+		if byte > 64 and byte < 123:
+			symbol.append(chr(byte))
+	
+	return "".join(symbol)
+
 def init_pools():
 	'''
 	Initializes a dict with some pools + their reserves and tokens
@@ -229,14 +267,22 @@ def init_pools():
 
 			(tok0, tok1) = getTokenAddresses(poolAddr)
 			(r0, r1) = getReserves(poolAddr)
+			s0 = get_symbol(tok0)
+			s1 = get_symbol(tok1)
 			pools[poolAddr] = {
 				"t0": {
 					"address": tok0,
+					"symbol": s0,
 					"reserve": r0
 				},
 				"t1": {
 					"address": tok1,
+					"symbol": s1,
 					"reserve": r1
 				}
 			}
 	return pools
+
+def load_pools() -> dict:
+	with open('./pools.json', 'r') as f:
+		return json.loads(f.read())
