@@ -118,5 +118,6 @@ def test_getReserves():
 pg = PoolGraph()
 
 pg.refresh_nodes_edges()
+# why broken?
 bellman_ford(pg.graph, pg.graph.nodes[0])
 bellman_ford(pg.graph, pg.graph.nodes[3])
