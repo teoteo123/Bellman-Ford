@@ -107,5 +107,6 @@ def test_getReserves():
 
 
 	print(str(r0) + '\n' + str(r1))
-	# print('0x' + json.loads(response.content)['result'])
-test_getReserves()
+# test_getReserves()
+	
+print(getPairAddress('0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E', '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7'))
