@@ -142,3 +142,101 @@ def getReserves(poolAddress: str) -> (int, int):
 	r1 = literal_eval('0x' + result[64:128][-28:])
 
 	return (r0, r1)
+
+def getTokenAddresses(poolAddress: str) -> (str, str):
+	infura_url = 'https://avalanche-mainnet.infura.io/v3/d1e7d4e46bba461cb67651a8c5d508b8'
+	headers = {
+    'Content-Type': 'application/json',
+	}
+	token_0_selector = '0x0dfe1681'
+	token_1_selector = '0xd21220a7'
+
+	t0_json_data = {
+			'jsonrpc': '2.0',
+			'method': 'eth_call',
+			'params': [
+					{
+							'from': '0xBd14F2b9813b23AF7e38C979EaDfaF17C049bEA5',
+							'to': poolAddress, # pool address
+							'data': token_0_selector, # getReserves function selector
+					},
+					'latest',
+			],
+			'id': 1,
+	}
+	t1_json_data = {
+			'jsonrpc': '2.0',
+			'method': 'eth_call',
+			'params': [
+					{
+							'from': '0xBd14F2b9813b23AF7e38C979EaDfaF17C049bEA5',
+							'to': poolAddress, # pool address
+							'data': token_1_selector, # getReserves function selector
+					},
+					'latest',
+			],
+			'id': 1,
+	}
+
+	t0_response = requests.post(
+			infura_url,
+			headers=headers,
+			json=t0_json_data,
+	)
+	t1_response = requests.post(
+			infura_url,
+			headers=headers,
+			json=t1_json_data,
+	)
+
+	t0_result = json.loads(t0_response.content)['result'][2:]
+	t1_result = json.loads(t1_response.content)['result'][2:]
+
+	t0 = '0x' + t0_result[-40:]
+	t1 = '0x' + t1_result[-40:]
+	return (t0, t1)
+
+def init_pools():
+	'''
+	Initializes a dict with some pools + their reserves and tokens
+	{
+		"poolAddr": {
+			"t0": {
+					"address": "0xtok0Address",
+					"reserve": 100
+			},
+			"t1": {
+				"address": "0xtok1Address",
+				"reserve": 100
+			}
+		}
+	}
+	'''
+	tokenAddrs = [
+		"0x2b2C81e08f1Af8835a78Bb2A90AE924ACE0eA4bE",
+		"0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7",
+		"0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
+		"0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7",
+		"0x6e84a6216eA6dACC71eE8E6b0a5B7322EEbC0fDd",
+		"0x60781C2586D68229fde47564546784ab3fACA982",
+	]
+	pools = {}
+	for i in range(len(tokenAddrs)):
+		for j in range(i, len(tokenAddrs)):
+			poolAddr = getPairAddress(token0address=tokenAddrs[i], token1address=tokenAddrs[j])
+			if poolAddr == '0x0000000000000000000000000000000000000000':
+				continue
+
+			(tok0, tok1) = getTokenAddresses(poolAddr)
+			(r0, r1) = getReserves(poolAddr)
+			pools[poolAddr] = {
+				"t0": {
+					"address": tok0,
+					"reserve": r0
+				},
+				"t1": {
+					"address": tok1,
+					"reserve": r1
+				}
+			}
+	return pools
