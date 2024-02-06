@@ -2,9 +2,6 @@
 
 class Node():
 
-	edges: []
-	value: any
-
 	def __init__(self, value):
 		self.value = value
 		self.edges = []
@@ -21,10 +18,13 @@ class Node():
 			self.edges.remove(edge)
 	
 	def __str__(self) -> str:
-		return "Node(value=%s edges=%s)" % (self.value, self.edges)
+		return "Node(value=%s edges=%s)" % (self.value, "".join(['\n\t' + str(edge.weight) + '  ' + str(edge.nodes[1].value) for edge in self.edges]))
 	
 	def __eq__(self, __value: object) -> bool:
 		return self.value == __value.value
+	
+	def __hash__(self) -> int:
+		return self.value.__hash__()
 
 
 '''
@@ -34,9 +34,7 @@ Edge(weight=0.6, nodes=['a', 'b']) === (a)-->(b)
 '''
 class Edge():
 
-	nodes: []
-
-	def __init__(self, nodes, weight):
+	def __init__(self, nodes, weight: float):
 		self.nodes = nodes
 		self.weight = weight
 
@@ -63,21 +61,18 @@ class Edge():
 	
 '''
 Collection of nodes and edges with some functions to help out
+To traverse graph, iterate nodes and look for neighboring nodes via their edges
 '''
 class Graph():
-	nodes: []
-	edges: []
 
-	def __init__(self, nodes, edges) -> None:
-		if (nodes != None):
-			self.nodes = nodes
-		else:
-			self.nodes = []
+	def __init__(self, nodes=[], edges=[]) -> None:
+		self.nodes = []
+		for node in nodes:
+			self.add_node(node)
 		
 		self.edges = []
-		if (self.edges != None):
-			for edge in edges:
-				self.add_edge(edge)
+		for edge in edges:
+			self.add_edge(edge)
 
 	def add_node(self, node: Node):
 		self.nodes.append(node)
@@ -85,7 +80,6 @@ class Graph():
 	# Works like adding to a set
 	def add_edge(self, edge: Edge):
 		if edge not in self.edges:
-			
 			self.edges.append(edge)
 			edge.nodes[0].add_edge(edge)
 
